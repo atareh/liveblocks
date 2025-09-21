@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halo Orb - Interactive 3D Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            overflow: hidden;
+            color: #fff;
+        }
+
+        #canvas-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #three-canvas {
+            display: block;
+            cursor: grab;
+        }
+
+        #three-canvas:active {
+            cursor: grabbing;
+        }
+
+        #ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #soldier-selector {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: all;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .soldier-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .soldier-btn {
+            padding: 15px 20px;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .soldier-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .soldier-btn.active {
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .soldier-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .soldier-btn:hover::before {
+            left: 100%;
+        }
+
+        #info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            pointer-events: all;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 300px;
+        }
+
+        #controls-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            pointer-events: all;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        h3 {
+            margin-bottom: 10px;
+            color: #00ff88;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #00ff88;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            #soldier-selector {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                padding: 15px;
+            }
+            
+            .soldier-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            #info-panel, #controls-info {
+                bottom: 10px;
+                left: 10px;
+                right: 10px;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container">
+        <canvas id="three-canvas"></canvas>
+        
+        <div id="ui-overlay">
+            <div id="soldier-selector">
+                <h3>Choose Your Soldier</h3>
+                <div class="soldier-grid">
+                    <button class="soldier-btn active" data-soldier="spartan">
+                        🛡️ Spartan
+                    </button>
+                    <button class="soldier-btn" data-soldier="covenant">
+                        👽 Covenant
+                    </button>
+                    <button class="soldier-btn" data-soldier="forerunner">
+                        🔮 Forerunner
+                    </button>
+                    <button class="soldier-btn" data-soldier="flood">
+                        🦠 Flood
+                    </button>
+                </div>
+            </div>
+
+            <div id="info-panel">
+                <h3>Current Theme: Spartan</h3>
+                <p id="theme-description">Master Chief's iconic blue and orange energy signature with UNSC particle effects.</p>
+            </div>
+
+            <div id="controls-info">
+                <h3>Controls</h3>
+                <p>🖱️ Drag to rotate view<br>
+                🔍 Scroll to zoom<br>
+                📱 Touch & drag on mobile</p>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading Halo Orb...</p>
+        </div>
+    </div>
+
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>
