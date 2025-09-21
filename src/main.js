@@ -11,6 +11,7 @@ class HaloOrbApp {
         this.haloOrb = null;
         this.controls = null;
         this.currentTheme = 'spartan';
+        this.unicornScene = null;
         
         // Mouse/touch interaction
         this.mouse = new THREE.Vector2();
@@ -31,6 +32,7 @@ class HaloOrbApp {
         this.setupLights();
         this.setupControls();
         this.createHaloOrb();
+        this.initUnicornStudio();
         this.setupEventListeners();
         this.hideLoading();
         this.animate();
@@ -114,7 +116,34 @@ class HaloOrbApp {
     }
 
     createHaloOrb() {
-        this.haloOrb = new HaloOrb(this.scene, SoldierThemes.spartan);
+        // Create the halo orb but without the central orb (only particles and effects)
+        this.haloOrb = new HaloOrb(this.scene, SoldierThemes.spartan, true); // true = no central orb
+    }
+
+    async initUnicornStudio() {
+        try {
+            // Initialize Unicorn Studio with the star scene
+            this.unicornScene = await window.UnicornStudio.addScene({
+                elementId: "unicorn-container",
+                fps: 60,
+                scale: 1,
+                dpi: 1.5,
+                filePath: "/unicorn-star.json", // Using our local JSON file
+                lazyLoad: false,
+                altText: "Unicorn Studio Star Animation",
+                ariaLabel: "3D animated star with effects",
+                interactivity: {
+                    mouse: {
+                        disableMobile: false,
+                        disabled: false
+                    }
+                }
+            });
+            
+            console.log('Unicorn Studio scene initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize Unicorn Studio:', error);
+        }
     }
 
     setupEventListeners() {
@@ -152,8 +181,8 @@ class HaloOrbApp {
         // Update UI
         const themeTitle = document.querySelector('#info-panel h3');
         const themeDesc = document.getElementById('theme-description');
-        themeTitle.textContent = `Current Theme: ${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`;
-        themeDesc.textContent = theme.description;
+        themeTitle.textContent = `Unicorn Star + ${themeName.charAt(0).toUpperCase() + themeName.slice(1)}`;
+        themeDesc.textContent = `3D animated star with ${theme.description.toLowerCase()}`;
     }
 
     // Mouse/Touch Event Handlers

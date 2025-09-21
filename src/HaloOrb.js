@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 
 export class HaloOrb {
-    constructor(scene, theme) {
+    constructor(scene, theme, noCentralOrb = false) {
         this.scene = scene;
         this.theme = theme;
         this.group = new THREE.Group();
+        this.noCentralOrb = noCentralOrb;
         
         // Core orb properties
         this.orbRadius = 1.5;
@@ -15,10 +16,14 @@ export class HaloOrb {
         this.time = 0;
         this.pulseIntensity = 0;
         
-        this.createCoreOrb();
+        // Only create central orb if not disabled
+        if (!this.noCentralOrb) {
+            this.createCoreOrb();
+            this.createGlow();
+        }
+        
         this.createParticleSystem();
         this.createEnergyRings();
-        this.createGlow();
         
         this.scene.add(this.group);
     }
@@ -317,9 +322,11 @@ export class HaloOrb {
     updateTheme(newTheme) {
         this.theme = newTheme;
         
-        // Update core orb colors
-        this.coreOrb.material.uniforms.primaryColor.value.setHex(newTheme.primaryColor);
-        this.coreOrb.material.uniforms.secondaryColor.value.setHex(newTheme.secondaryColor);
+        // Update core orb colors (only if it exists)
+        if (this.coreOrb) {
+            this.coreOrb.material.uniforms.primaryColor.value.setHex(newTheme.primaryColor);
+            this.coreOrb.material.uniforms.secondaryColor.value.setHex(newTheme.secondaryColor);
+        }
         
         // Update particle colors
         const colors = this.particles.geometry.attributes.color;
@@ -338,21 +345,25 @@ export class HaloOrb {
             ring.material.uniforms.ringColor.value.setHex(newTheme.primaryColor);
         });
         
-        // Update glow
-        this.glow.material.uniforms.glowColor.value.setHex(newTheme.primaryColor);
+        // Update glow (only if it exists)
+        if (this.glow) {
+            this.glow.material.uniforms.glowColor.value.setHex(newTheme.primaryColor);
+        }
     }
 
     update() {
         this.time += 0.016; // ~60fps
         
-        // Update core orb
-        this.coreOrb.material.uniforms.time.value = this.time;
-        this.pulseIntensity = Math.sin(this.time * 2) * 0.5 + 0.5;
-        this.coreOrb.material.uniforms.pulseIntensity.value = this.pulseIntensity;
-        
-        // Rotate the core orb
-        this.coreOrb.rotation.y += 0.005;
-        this.coreOrb.rotation.x += 0.002;
+        // Update core orb (only if it exists)
+        if (this.coreOrb) {
+            this.coreOrb.material.uniforms.time.value = this.time;
+            this.pulseIntensity = Math.sin(this.time * 2) * 0.5 + 0.5;
+            this.coreOrb.material.uniforms.pulseIntensity.value = this.pulseIntensity;
+            
+            // Rotate the core orb
+            this.coreOrb.rotation.y += 0.005;
+            this.coreOrb.rotation.x += 0.002;
+        }
         
         // Update particles
         this.particles.material.uniforms.time.value = this.time;
@@ -390,8 +401,10 @@ export class HaloOrb {
             ring.rotation.z += 0.01 * (index + 1);
         });
         
-        // Update glow
-        this.glow.material.uniforms.time.value = this.time;
+        // Update glow (only if it exists)
+        if (this.glow) {
+            this.glow.material.uniforms.time.value = this.time;
+        }
         
         // Rotate the entire group slightly
         this.group.rotation.y += 0.002;

@@ -183,6 +183,18 @@
     <div id="canvas-container">
         <canvas id="three-canvas"></canvas>
         
+        <!-- Unicorn Studio Container -->
+        <div id="unicorn-container" style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            pointer-events: none;
+            z-index: 50;
+        "></div>
+        
         <div id="ui-overlay">
             <div id="soldier-selector">
                 <h3>Choose Your Soldier</h3>
@@ -203,8 +215,8 @@
             </div>
 
             <div id="info-panel">
-                <h3>Current Theme: Spartan</h3>
-                <p id="theme-description">Master Chief's iconic blue and orange energy signature with UNSC particle effects.</p>
+                <h3>Unicorn Star + Spartan</h3>
+                <p id="theme-description">3D animated star with Master Chief's iconic blue and orange particle effects surrounding it.</p>
             </div>
 
             <div id="controls-info">
@@ -217,10 +229,13 @@
 
         <div id="loading" class="loading">
             <div class="spinner"></div>
-            <p>Loading Halo Orb...</p>
+            <p>Loading Unicorn Star Experience...</p>
         </div>
     </div>
 
+    <!-- Unicorn Studio SDK -->
+    <script src="https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v1.4.31/dist/unicornStudio.umd.js"></script>
+    
     <script type="module" src="src/main.js"></script>
 </body>
 </html>
